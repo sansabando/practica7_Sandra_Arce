@@ -1,0 +1,829 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SANTLIX</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/estilo.css">
+    <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
+    <script src="search.js" defer></script>
+    <script src="keywords.js" defer></script>
+    <script src="navigation.js" defer></script>
+
+
+
+</head>
+<body> 
+
+    <div id="navigation">
+        <nav class="navigation">
+            <button data-view="home" class="nav-button">Home</button>
+            <button data-view="movies" class="nav-button">Movies</button>
+            <button data-view="profile" class="nav-button">Profile</button>
+        </nav>
+    </div>
+    <div id="main"></div>
+ 
+
+<script type="text/javascript">
+    const initial_movies = [
+        { id:1,title: "Superlópez", director: "Javier Ruiz Caldera", thumbnail: "files/superlopez.png" },
+        { id:2,title: "Jurassic Park", director: "Steven Spielberg", thumbnail: "files/jurassicpark.png" },
+        { id:3,title: "Interstellar", director: "Christopher Nolan", thumbnail: "files/interstellar.png" }
+    ];
+    
+    const user = [
+        { name: "Adrian", img: "files/foto_dino.png" },
+        
+    ];
+
+    const recommendations = {
+        "Adrian": [
+            { title: "Jurassic Park 2", director: "Steven Spielberg", thumbnail: "files/jurassicpark2.png" }
+        ],
+        "Pablo": [
+            { title: "Super Mario Bros", director: "Annabel Jankel", thumbnail: "files/supermariobros.png" }
+        ],
+        "Arianna": [
+            { title: "Beauty and the Beast", director: "Gary Trousdale", thumbnail: "files/beautyandbeast.png" }
+        ]
+    };
+
+    const welcomeView = () => {
+        return `
+            <div class="user-selection">
+                <h1>SANTLIX</h1>
+                <p>Select your user:</p>
+                <div class="user-buttons">
+                    ${users.map(user => `
+                        <button class="user-button" data-user="${user.name}">
+                            <img src="${user.img}" alt="${user.name}">
+                            ${user.name}
+                        </button>
+                    `).join('')}
+                </div>
+                
+            </div>`;
+    };
+
+
+    const indexView = (movies, user) => {
+        let trailerHTML = '';
+        if (user === 'Adrian') {
+            trailerHTML = `
+                <div class="trailer-section">
+                    <h2 class="trailer-title">THE LEGO BATMAN MOVIE</h2>
+                    <iframe width="60%" height="315"  src="https://www.youtube.com/embed/n9c83L8hevQ?autoplay=1&mute=1" 
+                        title="The LEGO Batman Movie Trailer" frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                    </iframe>
+                </div>`;
+        } else if (user === 'Pablo') {
+            trailerHTML = `
+                <div class="trailer-section">
+                    <h2 class="trailer-title">BARBIE</h2>
+                    <iframe width="60%" height="315" src="https://www.youtube.com/embed/jNoET7IGhcA?autoplay=1&mute=1" 
+                        title="Barbie Trailer" frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                    </iframe>
+                </div>`;
+        } else if (user === 'Arianna') {
+            trailerHTML = `
+            <div class="trailer-section">
+                <h2 class="trailer-title">NARCOS</h2>
+                <iframe width="60%" height="315" src="https://www.youtube.com/embed/xl8zdCY-abw?autoplay=1&mute=1" 
+                    title="Narcos Trailer" frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                </iframe>
+            </div>`;
+        }
+
+
+
+        let view = `
+            <button class="back-button">Back</button>
+            <h1>SANTLIX</h1>
+            <div class="expand-profile-actions">
+                <button class="reset-button reset">Reset</button>
+                <button class="search-icon">&#128269;</button>
+                <button class="view-my-keywords">My Keywords</button>
+            </div>
+            <div class="profile-header">${user}'s Profile</div>
+            <div class="decorative-line"></div>
+            ${trailerHTML}
+            <h2 class="profile-subheader">My Favourite Movies</h2>
+            <div class="movie-list">
+        `;
+
+        movies.forEach((movie) => {
+            view += `
+                <div class="movie">
+                    <img src="${movie.thumbnail}" onerror="this.src='files/noimage.png'" alt="${movie.title}">
+                    <div class="title">${movie.title || "<em>No title</em>"}</div>
+                    <div class="actions">
+                        <button class="show" data-movie-id="${movie.id}">Show</button>
+                        <button class="edit" data-movie-id="${movie.id}">Edit</button>
+                        <button class="delete" data-movie-id="${movie.id}">Delete</button>
+                        <button class="view-keywords" data-movie-id="${movie.id}">Keywords</button>
+                    </div>
+                </div>`;
+        });
+
+
+        view += `</div>
+                <div class="recommendation-section">
+                    <h2 class="profile-subheader">Recommended Movies for Your Profile</h2>
+                    <button class="add-button new">Add New Movie</button>
+                    <div class="recommended-list">`;
+
+
+        recommendations[user].forEach((movie, i) => {
+        view += `
+            <div class="recommended-movie">
+                <img src="${movie.thumbnail}" alt="${movie.title}">
+                <h3>${movie.title}</h3>
+                <button class="add-movie" data-movie='${JSON.stringify(movie)}'>Add</button>
+            </div>
+
+                
+                <div class="actions">
+                    <button class="show-recommended" data-recommended-id="${i}">Show</button>
+                    <button class="add-recommended" data-recommended-id="${i}">Add Movie</button>
+                     <button class="view-keywords" data-movie-id="${movie.id || i}">View Keywords</button>
+                </div>
+            </div>`;
+        });
+
+
+        view += `</div>
+                </div>`;
+
+        return view;
+    };
+
+    const renderHomeView = async () => {
+        const user = localStorage.getItem("selected_user");
+        const trendingMovies = await getTrendingMovies();
+
+        document.getElementById("main").innerHTML = `
+            <h1>Home</h1>
+            <h2>Welcome, ${user}</h2>
+            <div class="trailer-section">
+                ${indexView([], user)} <!-- Tráiler solo aquí -->
+            </div>
+            <div class="trending-section">
+                <h2>Trending Movies</h2>
+                ${trendingView(trendingMovies)}
+            </div>
+        `;
+    };
+
+    const addCarouselHandlers = () => {
+        const carousel = document.querySelector('.movie-carousel');
+        const leftArrow = document.querySelector('.left-arrow');
+        const rightArrow = document.querySelector('.right-arrow');
+        const movieCards = document.querySelectorAll('.movie-card');
+
+        let currentIndex = 0;
+
+        const updateActiveMovie = () => {
+            movieCards.forEach((card, index) => {
+                card.classList.toggle('active', index === currentIndex);
+            });
+        };
+
+        leftArrow.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                carousel.scrollTo({ left: currentIndex * 170, behavior: 'smooth' });
+                updateActiveMovie();
+            }
+        });
+
+        rightArrow.addEventListener('click', () => {
+            if (currentIndex < movieCards.length - 1) {
+                currentIndex++;
+                carousel.scrollTo({ left: currentIndex * 170, behavior: 'smooth' });
+                updateActiveMovie();
+            }
+        });
+
+        updateActiveMovie(); 
+    };
+
+
+
+    
+
+
+
+        
+
+    const showView = (movie) => {
+        return `
+            <h2>${movie.title}</h2>
+            <p><strong>Director:</strong> ${movie.director}</p>
+            <img src="${movie.thumbnail}" style="width:150px; height:200px; object-fit: cover;" onerror="this.src='files/noimage.png'">
+            <div class="actions"><button class="index">Back</button></div>
+        `;
+    };
+
+    const editView = (movie, i) => {
+        return `
+            <h2>Edit Movie</h2>
+            <form id="edit-form">
+                <label>Title: <input type="text" id="edit-title" value="${movie.title}"></label><br>
+                <label>Director: <input type="text" id="edit-director" value="${movie.director}"></label><br>
+                <label>Thumbnail URL: <input type="text" id="edit-thumbnail" value="${movie.thumbnail}"></label><br>
+                <button type="button" class="update" data-my-id="${i}">Update</button>
+                <button type="button" class="index">Back</button>
+            </form>`;
+    };
+
+    const welcomeContr = () => {
+        document.getElementById('main').innerHTML = welcomeView();
+    };
+
+    const indexContr = async () => {
+        const user = localStorage.getItem("selected_user");
+        if (!user) return welcomeContr();
+
+        const my_movies_key = `my_movies_${user}`;
+        const my_movies = JSON.parse(localStorage.getItem(my_movies_key) || JSON.stringify(initial_movies));
+
+
+        const trendingMovies = await getTrendingMovies();
+
+        document.getElementById('main').innerHTML = `
+            ${indexView(my_movies, user)}
+            <div class="decorative-line"></div>
+            ${trendingView(trendingMovies)}
+        `;
+
+        document.querySelectorAll('.add-trending').forEach((button) => {
+            const index = button.getAttribute('data-index');
+            button.addEventListener('click', () => {
+                addTrendingContr(trendingMovies[index], user);
+            });
+        });
+    };
+    const getUserMovies = (user) => {
+        const my_movies_key = `my_movies_${user}`;
+        return JSON.parse(localStorage.getItem(my_movies_key) || "[]");
+    };
+
+
+
+
+    const showContr = (movieId) => {
+        const user = localStorage.getItem("selected_user");
+        const my_movies_key = `my_movies_${user}`;
+        const user_movies = JSON.parse(localStorage.getItem(my_movies_key) || "[]");
+
+        const movie = user_movies.find(movie => movie.id === movieId);
+        if (!movie) return;
+
+   
+        const popupOverlay = document.createElement('div');
+        popupOverlay.className = 'popup-overlay';
+        document.body.appendChild(popupOverlay);
+
+        const popup = document.createElement('div');
+        popup.className = 'popup';
+        popup.innerHTML = `
+            <h2>${movie.title}</h2>
+            <p><strong>Director:</strong> ${movie.director}</p>
+            <img src="${movie.thumbnail}" alt="${movie.title}">
+            <button class="close-btn">Close</button>
+        `;
+
+        document.body.appendChild(popup);
+
+   
+        popupOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+   
+        popup.querySelector('.close-btn').addEventListener('click', () => {
+            document.body.removeChild(popupOverlay);
+            document.body.removeChild(popup);
+        });
+    };
+
+
+
+    const showRecommendedContr = (i) => {
+        const user = localStorage.getItem("selected_user");
+        let movie = recommendations[user][i];
+        document.getElementById('main').innerHTML = showView(movie);
+    };
+
+    const editContr = (i) => {
+        const user = localStorage.getItem("selected_user");
+        let my_movies_key = `my_movies_${user}`;
+        let my_movies = JSON.parse(localStorage.getItem(my_movies_key));
+        document.getElementById('main').innerHTML = editView(my_movies[i], i);
+    };
+
+    const updateContr = (i) => {
+        const user = localStorage.getItem("selected_user");
+        let my_movies_key = `my_movies_${user}`;
+        let my_movies = JSON.parse(localStorage.getItem(my_movies_key));
+
+        my_movies[i] = {
+            title: document.getElementById('edit-title').value,
+            director: document.getElementById('edit-director').value,  
+            thumbnail: document.getElementById('edit-thumbnail').value
+        };
+
+        localStorage.setItem(my_movies_key, JSON.stringify(my_movies));
+        indexContr();
+    };
+
+
+    
+
+
+    const deleteContr = (movieId) => {
+        const user = localStorage.getItem("selected_user");
+        if (!user) return;
+
+        const my_movies_key = `my_movies_${user}`;
+        const user_movies = JSON.parse(localStorage.getItem(my_movies_key) || "[]");
+
+   
+        const updated_movies = user_movies.filter(movie => movie.id !== movieId);
+
+        localStorage.setItem(my_movies_key, JSON.stringify(updated_movies));
+
+    
+        renderMoviesView();
+    };
+
+
+
+
+    
+
+
+    const resetContr = () => {
+        const user = localStorage.getItem("selected_user");
+        if (!user) return;
+
+        const my_movies_key = `my_movies_${user}`;
+        localStorage.setItem(my_movies_key, JSON.stringify(initial_movies)); 
+
+        renderMoviesView(); 
+    };
+
+
+    const newContr = () => {
+        document.getElementById('main').innerHTML = `
+            <h2>Add New Movie</h2>
+            <form id="new-form">
+                <label>Title: <input type="text" id="new-title" required></label><br>
+                <label>Director: <input type="text" id="new-director" required></label><br>
+                <label>Thumbnail URL: <input type="text" id="new-thumbnail"></label><br>
+                <button type="button" class="create">Create</button>
+                <button type="button" class="index">Back</button>
+            </form>
+        `;
+    };
+
+    const createContr = () => {
+        const user = localStorage.getItem("selected_user");
+        let my_movies_key = `my_movies_${user}`;
+        let my_movies = JSON.parse(localStorage.getItem(my_movies_key)) || [];
+        const title = document.getElementById('new-title').value;
+        const director = document.getElementById('new-director').value;
+        const thumbnail = document.getElementById('new-thumbnail').value || 'files/noimage.png';
+        my_movies.push({ title, director, thumbnail });
+        localStorage.setItem(my_movies_key, JSON.stringify(my_movies));
+        indexContr();
+    };
+
+    const renderMoviesView = () => {
+        const user = localStorage.getItem("selected_user");
+        if (!user) return welcomeContr();
+
+        const my_movies_key = `my_movies_${user}`;
+        const user_movies = JSON.parse(localStorage.getItem(my_movies_key) || "[]");
+
+        document.getElementById("main").innerHTML = `
+            <h1>My Favorite Movies</h1>
+            <button class="reset-favorites">Reset Favorites</button>
+            <div class="movie-list" id="movie-list">
+                ${user_movies
+                    .map(
+                        (movie) => `
+                        <div class="movie-card" draggable="true" data-id="${movie.id}">
+                            <img src="${movie.thumbnail}" alt="${movie.title}" onerror="this.src='files/noimage.png'">
+                            <div class="title">${movie.title || "<em>No title</em>"}</div>
+                                <div class="actions">
+                                <button class="show" data-movie-id="${movie.id}">Show</button>
+                                <button class="delete" data-movie-id="${movie.id}">Delete</button>
+                                <button class="view-keywords" data-movie-id="${movie.id}">Keywords</button>
+                            </div>
+                        </div>
+                    `
+                    )
+                    .join("")}
+            </div>
+        `;
+
+  
+        initializeDragAndDrop();
+    };
+
+
+
+    const initializeDragAndDrop = () => {
+        const movieList = document.getElementById("movie-list");
+        let draggedElement = null;
+
+        movieList.addEventListener("dragstart", (event) => {
+            draggedElement = event.target;
+            draggedElement.classList.add("dragging");
+
+        
+            const placeholder = document.createElement("div");
+            placeholder.className = "movie-placeholder";
+            draggedElement.parentNode.insertBefore(placeholder, draggedElement.nextSibling);
+        });
+
+        movieList.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            const placeholder = document.querySelector(".movie-placeholder");
+            const closestMovie = Array.from(movieList.children).find((child) => {
+                return (
+                    child !== draggedElement &&
+                    child !== placeholder &&
+                    child.getBoundingClientRect().left > event.clientX
+                );
+            });
+
+            if (closestMovie) {
+                movieList.insertBefore(placeholder, closestMovie);
+            } else {
+                movieList.appendChild(placeholder);
+            }
+        });
+
+        movieList.addEventListener("drop", () => {
+            const placeholder = document.querySelector(".movie-placeholder");
+            if (placeholder) {
+                movieList.insertBefore(draggedElement, placeholder);
+                placeholder.remove();
+            }
+            draggedElement.classList.remove("dragging");
+
+       
+            saveNewMovieOrder();
+        });
+
+        movieList.addEventListener("dragend", () => {
+            const placeholder = document.querySelector(".movie-placeholder");
+            if (placeholder) placeholder.remove();
+            draggedElement = null;
+        });
+    };
+
+    const saveNewMovieOrder = () => {
+        const user = localStorage.getItem("selected_user");
+        const my_movies_key = `my_movies_${user}`;
+
+        const movieList = document.getElementById("movie-list");
+        const newOrder = Array.from(movieList.children).map((card) => ({
+            id: parseInt(card.getAttribute("data-id")),
+            title: card.querySelector(".title").textContent,
+            thumbnail: card.querySelector("img").src,
+        }));
+
+        localStorage.setItem(my_movies_key, JSON.stringify(newOrder));
+    };
+
+
+    
+
+
+
+
+   
+    
+
+    
+    
+
+    const renderQuizWithRewards = () => {
+        const questions = [
+            { question: "What is the name of the main witch in Wicked?", options: ["Elphaba", "Glinda", "Nessa-Rose", "Dorothy"], answer: "Elphaba" },
+            { question: "Who directed the original Star Wars movie?", options: ["Steven Spielberg", "George Lucas", "James Cameron", "Ridley Scott"], answer: "George Lucas" },
+            { question: "What is the name of the planet in Avatar?", options: ["Pandora", "Naboo", "Endor", "Tatooine"], answer: "Pandora" },
+            { question: "Which actor played the Joker in The Dark Knight?", options: ["Heath Ledger", "Joaquin Phoenix", "Jack Nicholson", "Jared Leto"], answer: "Heath Ledger" },
+            { question: "What year was Titanic released?", options: ["1995", "1997", "1999", "2000"], answer: "1997" },
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        const loadQuestion = () => {
+            if (currentQuestion >= questions.length) {
+                handleQuizCompletion();
+                return;
+            }
+
+            const question = questions[currentQuestion];
+            const quizContainer = document.getElementById("quiz-container");
+            if (!quizContainer) {
+                console.error("Quiz container not found.");
+                return;
+            }   
+            quizContainer.innerHTML =  `
+                <div class="quiz-header">
+                    <h2>THERE ARE PRIZES! 
+                        </h2>
+                        <h3> After getting more than 3 questions correct, unlock different prizes </h3>
+                </div>
+                <div class="quiz-question">
+                    <h3>${question.question}</h3>
+                    <div class="quiz-options">
+                        ${question.options
+                            .map(
+                                (option) =>
+                                    `<button class="quiz-option">${option}</button>`
+                            )
+                            .join("")}
+                    </div>
+                </div>
+            `;
+
+            document.querySelectorAll(".quiz-option").forEach(button => {
+                button.addEventListener("click", (event) => {
+                    if (event.target.textContent === question.answer) {
+                        score++;
+                    }
+                    currentQuestion++;
+                    loadQuestion();
+                    
+                    
+                });
+            });
+        };
+
+
+        const addDragAndDropHandlers = (movies) => {
+            const movieCards = document.querySelectorAll('.movie-card');
+
+            movieCards.forEach(card => {
+                card.addEventListener('dragstart', (event) => {
+                    event.dataTransfer.setData('text/plain', event.target.dataset.index);
+                });
+
+                card.addEventListener('dragover', (event) => {
+                    event.preventDefault();  
+                });
+
+                card.addEventListener('drop', (event) => {
+                    event.preventDefault();
+
+                    const draggedIndex = event.dataTransfer.getData('text/plain');
+                    const targetIndex = event.target.closest('.movie-card').dataset.index;
+
+                    if (draggedIndex !== undefined && targetIndex !== undefined) {
+               
+                        [movies[draggedIndex], movies[targetIndex]] = [movies[targetIndex], movies[draggedIndex]];
+
+                
+                        const user = localStorage.getItem('selected_user');
+                        const my_movies_key = `my_movies_${user}`;
+                        localStorage.setItem(my_movies_key, JSON.stringify(movies));
+
+              
+                        renderMoviesView();
+                    }
+                });
+            });
+        };
+
+
+        const showPopup = (imagePath, message) => {
+            const popupOverlay = document.createElement("div");
+            popupOverlay.className = "popup-overlay";
+            document.body.appendChild(popupOverlay);
+
+            const popup = document.createElement("div");
+            popup.className = "popup";
+            popup.innerHTML = `
+                <h2>${message}</h2>
+                <img src="${imagePath}" alt="Reward Image" style="width: 200px; height: 200px;">
+                <button class="close-btn">Close</button>
+            `;
+
+            document.body.appendChild(popup);
+
+            popupOverlay.style.display = "block";
+            popup.style.display = "block";
+
+            popup.querySelector(".close-btn").addEventListener("click", () => {
+                document.body.removeChild(popupOverlay);
+                document.body.removeChild(popup);
+            });
+            
+
+    
+        };
+    
+        
+
+
+        const handleQuizCompletion = () => {
+            let rewardMessage = "Try again to unlock prizes ";
+            let rewardImage = "files/joker.triste.png ";
+
+            if (score === 3) {
+                rewardMessage = "You have unlocked this profile picture: LEGO Batman!";
+                rewardImage = "files/batman.lego.png";
+            } else if (score === 4) {
+                rewardMessage = "You have unlocked this exclusive profile picture: Pink Batman!";
+                rewardImage = "files/batman.rosa.png";
+            } else if (score === 5) {
+                rewardMessage = "Congratulations! You unlocked: Real Batman!";
+                rewardImage = "files/batman.real.png";
+            }
+
+            document.getElementById("quiz-container").innerHTML = `
+                <div class="quiz-results">
+                    <h2>Your Score: ${score}/${questions.length}</h2>
+                    <button id="view-reward" class="reward-btn">View Rewars</button>
+                    <button id="restart-quiz" class="restart-quiz-btn">Restart Quiz</button>
+                </div>
+            `;
+
+            document.getElementById("view-reward").addEventListener("click", () => {
+                showPopup(rewardImage, rewardMessage);
+            });
+
+            document.getElementById("restart-quiz").addEventListener("click", () => {
+                currentQuestion = 0;
+                score = 0;
+                loadQuestion();
+            });
+        };
+        loadQuestion();
+
+
+    };
+
+
+
+
+    const renderProfileView = () => {
+        const user = localStorage.getItem("selected_user") || "User";
+
+        document.getElementById("main").innerHTML = `
+            <div class="profile-container">
+                <h1>${user}'s Profile</h1>
+                <div id="quiz-container"></div>
+            </div>
+        `;  
+
+    
+        renderQuizWithRewards();
+    };
+
+       
+
+
+
+
+    const addRecommendedContr = (movie) => {
+        const user = localStorage.getItem("selected_user");
+        if (!user) return;
+
+        const my_movies_key = `my_movies_${user}`;
+        const user_movies = JSON.parse(localStorage.getItem(my_movies_key) || "[]");
+
+        if (!user_movies.some(m => m.id === movie.id)) {
+            user_movies.push(movie);
+            localStorage.setItem(my_movies_key, JSON.stringify(user_movies));
+        }
+
+        renderMoviesView();
+    };
+
+
+    
+
+
+    
+
+
+
+
+    document.addEventListener('click', ev => {
+        if (ev.target.matches('.nav-button')) {
+            const view = ev.target.getAttribute('data-view');
+            if (view === "home") {
+                renderHomeView();
+            } else if (view === "movies") {
+                renderMoviesView();
+            } else if (view === "profile") {
+                renderProfileView();
+            }
+        } else if (ev.target.matches('.user-button')) {
+            const selectedUser = ev.target.getAttribute("data-user");
+            localStorage.setItem("selected_user", selectedUser);
+            renderHomeView(); 
+        }
+        else if (ev.target.matches('.view-keywords')) {
+            const movieId = ev.target.getAttribute('data-movie-id');
+            keywordsView(movieId);
+        } else if (ev.target.matches('.view-my-keywords')) {
+            myKeywordsView();
+        }
+        else if (ev.target.matches('.add-trending')) {
+            const movieIndex = ev.target.getAttribute('data-index');
+            const trendingMovies = JSON.parse(localStorage.getItem('trending_movies') || "[]");
+            const movieToAdd = trendingMovies[movieIndex];
+        }
+        
+        else if (ev.target.matches('.back-button')) {
+            welcomeContr(); 
+        } else if (ev.target.matches('.home-button')) {
+            const user = localStorage.getItem("selected_user");
+            indexContr(user); 
+        }
+        else if (ev.target.matches('.add-movie')) {
+            const movie = JSON.parse(ev.target.getAttribute('data-movie'));
+            addRecommendedContr(movie);
+        }
+
+        else if (ev.target.matches('.index')) indexContr();
+        else if (ev.target.matches('.show')) {
+            const movieId = Number(ev.target.getAttribute("data-movie-id"));
+            showContr(movieId);
+        }
+    
+        else if (ev.target.matches('.show-recommended')) showRecommendedContr(Number(ev.target.dataset.recommendedId));
+        else if (ev.target.matches('.edit')) editContr(Number(ev.target.dataset.movieID));
+        else if (ev.target.matches('.update')) updateContr(Number(ev.target.dataset.myId));
+        else if (ev.target.matches('.new')) newContr();
+        else if (ev.target.matches('.create')) createContr();
+        else if (ev.target.matches('.delete')) {
+            const movieId = Number(ev.target.getAttribute("data-movie-id"));
+            deleteContr(movieId); 
+        
+
+        }
+        else if (ev.target.matches('.reset-favorites')) {
+            resetContr(); 
+        }
+
+      
+        else if (ev.target.matches('.reset')) resetContr();
+        else if (ev.target.matches('.add-recommended')) {
+            const index = Number(ev.target.getAttribute("data-recommended-id"));
+            addRecommendedContr(index);
+        }
+        
+        else if (ev.target.matches('.user-button')) {
+            localStorage.setItem("selected_user", ev.target.dataset.user);
+            indexContr();
+        }
+        else if (ev.target.matches('.category-btn')) {
+            fetchAndShowCategories(); 
+        }
+
+        else if (ev.target.matches('.search-btn')) handleSearch();
+        else if (ev.target.matches('.search-icon')) toggleSearchBar();
+        else if (ev.target.matches('.search-movies-by-keyword')) { 
+            const keywordId = ev.target.dataset.keywordId; 
+            if (!keywordId) {
+                console.error('Keyword ID not found.');
+                alert('Error: Could not find the keyword ID.');
+                return;
+            }
+            console.log('Searching movies for keyword ID:', keywordId); 
+            searchMoviesByKeyword(keywordId); 
+        }
+
+
+        
+    }
+    );
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const user = localStorage.getItem("selected_user");
+        if (user) {
+            renderHomeView(); 
+        } else {
+            welcomeContr(); 
+        }
+    });
+
+</script>
+</head>
+<body>
+<div id="main"></div>
+</body>
+</html>
